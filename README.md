@@ -1,0 +1,2 @@
+# investor
+Stock market simulator.
