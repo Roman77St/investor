@@ -1,0 +1,6 @@
+investor_env
+Chat.odt
+*.pyc
+migrations/
+db.sqlite3
+GeminiChat.odt
