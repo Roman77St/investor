@@ -8,8 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 BLUE_CHIPS_TICKERS = [
-    'SBER',
-    'GAZP', 'LKOH', 'TATN', 'T', 'NVTK', 'YDEX', 'GMKN',
+    'SBER', 'GAZP', 'LKOH', 'TATN', 'T', 'NVTK', 'YDEX', 'GMKN',
     'PLZL', 'X5', 'ROSN', 'SNGS', 'MOEX', 'CHMF', 'NLMK'
 ]
 

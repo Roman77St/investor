@@ -113,7 +113,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'ru-ru'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
@@ -130,3 +130,27 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Настройки Celery
+# =========================================================
+
+# Подключаемся к локальному Redis (по умолчанию порт 6379, база 0)
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+# Используем Redis для хранения результатов задач (опционально, но полезно)
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
+
+# Конфигурация задач
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Europe/Moscow' # Установим часовой пояс для планировщика
+
+# CELERY BEAT: Настройка периодических задач
+CELERY_BEAT_SCHEDULE = {
+    # Имя задачи в планировщике
+    'update-stock-prices-every-minute': {
+        # Путь к функции-задаче
+        'task': 'apps.market.tasks.update_stock_prices_task',
+        # Запускать каждые 60 секунд (1 минута)
+        'schedule': 60.0,
+    },
+}
