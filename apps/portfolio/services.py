@@ -180,3 +180,35 @@ class PortfolioService:
             'total_profit_loss': total_profit_loss,
             'assets': asset_details,
         }
+
+    @staticmethod
+    def get_transaction_history(user, limit=50) -> list:
+        """
+        Возвращает историю транзакций пользователя.
+        """
+        portfolio = PortfolioService.get_user_portfolio(user)
+
+        # Получаем транзакции, связанные с портфелем, сортируем по дате,
+        # и подтягиваем связанные акции для оптимизации.
+        transactions = Transaction.objects.filter(
+            portfolio=portfolio
+        ).select_related(
+            'stock'
+        ).order_by(
+            '-timestamp' # Сначала самые новые
+        )[:limit]
+
+        # Сериализуем данные вручную (для простоты, без DRF Serializers)
+        history = []
+        for tx in transactions:
+            history.append({
+                'id': tx.id,
+                'action': tx.get_action_display(), # 'Покупка' или 'Продажа'
+                'ticker': tx.stock.ticker if tx.stock else 'Удалено',
+                'quantity': tx.quantity,
+                'price': tx.price,
+                'total': tx.price * tx.quantity,
+                'timestamp': tx.timestamp.isoformat(),
+            })
+
+        return history

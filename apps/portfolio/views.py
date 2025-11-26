@@ -77,3 +77,9 @@ class PortfolioViewSet(viewsets.GenericViewSet):
 
         # 2. Ответ клиенту
         return Response(summary_data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'])
+    def history(self, request):
+        """Возвращает историю транзакций пользователя."""
+        history_data = PortfolioService.get_transaction_history(request.user)
+        return Response(history_data, status=status.HTTP_200_OK)

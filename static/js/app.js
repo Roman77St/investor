@@ -1,5 +1,6 @@
 const API_ROOT = '/api/portfolio/trade/';
 const SUMMARY_URL = '/api/portfolio/summary/';
+const HISTORY_URL = '/api/portfolio/history/';
 const LOGIN_URL = '/auth/token/login/';
 const LOGOUT_URL = '/auth/token/logout/';
 const tokenKey = 'authToken';
@@ -141,6 +142,47 @@ async function fetchPortfolioSummary() {
     } catch (error) {
         displayMessage('Не удалось загрузить данные портфеля.', true);
         console.error(error);
+    }
+    await fetchTransactionHistory();
+}
+
+async function fetchTransactionHistory() {
+    const token = getAuthToken();
+    if (!token) return;
+
+    try {
+        const response = await fetch(HISTORY_URL, {
+            headers: { 'Authorization': `Token ${token}` }
+        });
+
+        if (response.status === 401) {
+            // Если сессия истекла, это будет поймано в fetchPortfolioSummary
+            return;
+        }
+
+        const history = await response.json();
+
+        const tbody = document.getElementById('history-table').querySelector('tbody');
+        tbody.innerHTML = ''; // Очистка старых данных
+
+        history.forEach(tx => {
+            const row = tbody.insertRow();
+            const timestamp = new Date(tx.timestamp).toLocaleString('ru-RU');
+            const total = parseFloat(tx.total);
+
+            // Стиль для "Покупка" (BUY) и "Продажа" (SELL)
+            const actionClass = tx.action === 'Покупка' ? 'loss' : 'profit';
+
+            row.insertCell().textContent = timestamp;
+            row.insertCell().innerHTML = `<span class="${actionClass}">${tx.action}</span>`;
+            row.insertCell().textContent = tx.ticker;
+            row.insertCell().textContent = tx.quantity;
+            row.insertCell().textContent = parseFloat(tx.price).toFixed(2);
+            row.insertCell().textContent = total.toFixed(2);
+        });
+
+    } catch (error) {
+        console.error('Не удалось загрузить историю транзакций.', error);
     }
 }
 
