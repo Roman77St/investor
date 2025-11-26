@@ -4,3 +4,7 @@ Chat.odt
 migrations/
 db.sqlite3
 GeminiChat.odt
+celerybeat-schedule
+.gitignore
+celerybeat-schedule-shm
+celerybeat-schedule-wal

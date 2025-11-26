@@ -42,6 +42,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'rest_framework',
+    'djoser',
+    'rest_framework.authtoken', # Для аутентификации по токенам
+
     'apps.users.apps.UsersConfig',
     'apps.market.apps.MarketConfig',
     'apps.portfolio.apps.PortfolioConfig',
@@ -63,7 +67,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -125,6 +129,11 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+STATICFILES_DIRS = [
+    # Указываем Django искать статику в корневой папке static/
+    os.path.join(BASE_DIR, 'static'),
+]
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
@@ -158,3 +167,28 @@ CELERY_BEAT_SCHEDULE = {
 # Запуск  Redis: docker run -d -p 6379:6379 --name investor-redis redis
 # Запуск Celery worker: celery -A config worker -l info
 # Запуск планировщика Celery: celery -A config beat -l info
+
+# Django Rest Framework Settings
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        # 💡 Аутентификация по токену (полученный токен передаем в Headers)
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}
+
+# Djoser Settings
+DJOSER = {
+    'USER_ID_FIELD': 'id', # Используем ID в качестве идентификатора
+    'PASSWORD_RESET_CONFIRM_URL': '#/password/reset/confirm/{uid}/{token}',
+    'USERNAME_RESET_CONFIRM_URL': '#/username/reset/confirm/{uid}/{token}',
+    'ACTIVATION_URL': '#/activate/{uid}/{token}',
+    'SEND_ACTIVATION_EMAIL': False,
+    'SERIALIZERS': {
+        'user_create': 'apps.users.serializers.CustomUserCreateSerializer',
+        'current_user': 'apps.users.serializers.CustomUserSerializer',
+    },
+    'TOKEN_MODEL': 'rest_framework.authtoken.models.Token', # Используем стандартный токен DRF
+}

@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from apps.portfolio.models import Portfolio, Asset, Transaction
@@ -133,3 +134,49 @@ class PortfolioService:
         logger.info(f"{user.username} продал {quantity} шт. {ticker_symbol} по {current_price:.2f}.")
 
         return {'success': True, 'message': message}
+
+    @staticmethod
+    def get_portfolio_summary(user) -> dict:
+        """
+        Возвращает сводку по портфелю пользователя, включая текущую стоимость
+        и расчетную прибыль/убыток.
+        """
+        portfolio = PortfolioService.get_user_portfolio(user)
+        assets = portfolio.assets.select_related('stock') # Оптимизация
+
+        total_market_value = Decimal('0.00')
+        total_profit_loss = Decimal('0.00')
+        asset_details = []
+
+        for asset in assets:
+            stock = asset.stock
+            # Текущая стоимость актива
+            market_value = asset.quantity * stock.current_price
+
+            # Стоимость покупки
+            cost_basis = asset.quantity * asset.average_buy_price
+
+            # Прибыль/Убыток по активу
+            profit_loss = market_value - cost_basis
+
+            total_market_value += market_value
+            total_profit_loss += profit_loss
+
+            asset_details.append({
+                'ticker': stock.ticker,
+                'name': stock.name,
+                'quantity': asset.quantity,
+                'current_price': stock.current_price,
+                'average_buy_price': asset.average_buy_price,
+                'market_value': market_value,
+                'profit_loss': profit_loss,
+                'lot_size': stock.lot_size,
+            })
+
+        return {
+            'balance': portfolio.balance,
+            'total_market_value': total_market_value,
+            'net_worth': portfolio.balance + total_market_value, # Чистая стоимость (Баланс + Акции)
+            'total_profit_loss': total_profit_loss,
+            'assets': asset_details,
+        }
