@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db import models
 from django.conf import settings
 from apps.market.models import Stock
@@ -13,7 +14,7 @@ class Portfolio(models.Model):
     balance = models.DecimalField(
         max_digits=14,
         decimal_places=2,
-        default=100000.00,
+        default=Decimal('100000.00'),
         verbose_name="Баланс (RUB)"
     )
 

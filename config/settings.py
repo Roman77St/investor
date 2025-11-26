@@ -154,3 +154,7 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': 60.0,
     },
 }
+# Для автоматического обновления цен запускаем следующие процессы:
+# Запуск  Redis: docker run -d -p 6379:6379 --name investor-redis redis
+# Запуск Celery worker: celery -A config worker -l info
+# Запуск планировщика Celery: celery -A config beat -l info
