@@ -7,6 +7,8 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+COMMISSION_RATE = Decimal('0.001')  # 0.1%
+
 class PortfolioService:
 
     @staticmethod
@@ -34,11 +36,14 @@ class PortfolioService:
             return {'success': False, 'error': f"Количество {quantity} должно быть кратно размеру лота: {stock.lot_size}."}
 
         # 3. Рассчитываем общую стоимость сделки
-        total_cost = current_price * quantity
+        stock_cost = current_price * quantity
+        commission = stock_cost * COMMISSION_RATE
+        # Общая сумма, которую списываем со счета
+        total_debit = stock_cost + commission
 
         # 4. Проверяем баланс
-        if portfolio.balance < total_cost:
-            return {'success': False, 'error': f"Недостаточно средств. Требуется {total_cost:.2f} RUB, доступно {portfolio.balance:.2f} RUB."}
+        if portfolio.balance < total_debit:
+            return {'success': False, 'error': f"Недостаточно средств. Требуется {total_debit:.2f} RUB(включая комиссию {commission:.2f}), доступно {portfolio.balance:.2f} RUB."}
 
         # --- Логика покупки ---
 
@@ -52,7 +57,7 @@ class PortfolioService:
 
         # 6. Расчет новой взвешенной средней цены покупки
         old_total_cost = asset.average_buy_price * asset.quantity
-        new_total_cost = total_cost
+        new_total_cost = stock_cost # В расчет средней цены комиссия НЕ входит
         new_quantity = asset.quantity + quantity
 
         # Формула взвешенной средней цены (Weighted Average Cost):
@@ -63,7 +68,7 @@ class PortfolioService:
         asset.average_buy_price = new_average_price
         asset.save()
 
-        portfolio.balance -= total_cost
+        portfolio.balance -= total_debit
         portfolio.save()
 
         # 8. Создаем запись о транзакции
@@ -73,17 +78,19 @@ class PortfolioService:
             action='BUY',
             quantity=quantity,
             price=current_price
+            # Примечание: Мы могли бы создать отдельную модель для учета комиссии,
+            # но для MVP просто фиксируем комиссию в логе.
         )
 
-        logger.info(f"{user.username} купил {quantity} шт. {ticker_symbol} по {current_price:.2f}. Новая ср. цена: {new_average_price:.2f}.")
+        logger.info(f"{user.username} купил {quantity} шт. {ticker_symbol} по {current_price:.2f}. Комиссия: {commission:.2f}. Новая ср. цена: {new_average_price:.2f}.")
 
-        return {'success': True, 'message': f"Куплено {quantity} шт. {ticker_symbol} по цене {current_price:.2f}. Счет обновлен."}
+        return {'success': True, 'message': f"Куплено {quantity} шт. {ticker_symbol}. Списано {total_debit:.2f} RUB (в т.ч. комиссия {commission:.2f})."}
 
     @staticmethod
     @transaction.atomic
     def sell_stock(user, ticker_symbol: str, quantity: int) -> dict:
         """
-        Обрабатывает продажу акций.
+        Обрабатывает продажу акций, включая расчет комиссии.
         Проверяет наличие, рассчитывает доход, обновляет Asset и Portfolio, создает Transaction.
         """
         portfolio = PortfolioService.get_user_portfolio(user)
@@ -106,12 +113,15 @@ class PortfolioService:
         # --- Логика продажи ---
 
         # 3. Рассчитываем доход и обновляем Asset
-        revenue = current_price * quantity
+        stock_revenue = current_price * quantity
+        commission = stock_revenue * COMMISSION_RATE
+
+        total_credit = stock_revenue - commission
 
         asset.quantity -= quantity
 
         # 4. Обновляем баланс
-        portfolio.balance += revenue
+        portfolio.balance += total_credit
         portfolio.save()
 
         # 5. Создаем запись о транзакции
@@ -126,40 +136,47 @@ class PortfolioService:
         # 6. Удаляем Asset, если она обнуляется
         if asset.quantity == 0:
             asset.delete()
-            message = f"Продано {quantity} шт. {ticker_symbol} по цене {current_price:.2f}. Позиция закрыта."
+            message = f"Продано {quantity} шт. {ticker_symbol}. Получено {total_credit:.2f} RUB (вычтена комиссия {commission:.2f}). Позиция закрыта."
         else:
             asset.save()
-            message = f"Продано {quantity} шт. {ticker_symbol} по цене {current_price:.2f}. Остаток: {asset.quantity} шт."
+            message = f"Продано {quantity} шт. {ticker_symbol}. Получено {total_credit:.2f} RUB (вычтена комиссия {commission:.2f}). Остаток: {asset.quantity} шт."
 
-        logger.info(f"{user.username} продал {quantity} шт. {ticker_symbol} по {current_price:.2f}.")
+        logger.info(f"{user.username} продал {quantity} шт. {ticker_symbol} по {current_price:.2f}. Комиссия: {commission:.2f}.")
 
         return {'success': True, 'message': message}
 
     @staticmethod
     def get_portfolio_summary(user) -> dict:
         """
-        Возвращает сводку по портфелю пользователя, включая текущую стоимость
-        и расчетную прибыль/убыток.
+        Возвращает сводку по портфелю пользователя, включая текущую стоимость,
+        включая P&L в абсолютных числах и процентах.
         """
         portfolio = PortfolioService.get_user_portfolio(user)
         assets = portfolio.assets.select_related('stock') # Оптимизация
 
         total_market_value = Decimal('0.00')
+        total_cost_basis = Decimal('0.00') # Сколько реально потрачено денег
         total_profit_loss = Decimal('0.00')
         asset_details = []
 
         for asset in assets:
             stock = asset.stock
-            # Текущая стоимость актива
+            # Текущая рыночная стоимость
             market_value = asset.quantity * stock.current_price
 
-            # Стоимость покупки
+            # Сколько было потрачено на покупку (Cost Basis)
             cost_basis = asset.quantity * asset.average_buy_price
 
-            # Прибыль/Убыток по активу
+            # Прибыль/Убыток по активу в деньгах
             profit_loss = market_value - cost_basis
 
+            # Расчет P&L % для АКТИВА Формула: (P&L / Cost Basis) * 100
+            profit_loss_percent = Decimal('0.00')
+            if cost_basis > 0:
+                profit_loss_percent = (profit_loss / cost_basis) * Decimal('100.00')
+
             total_market_value += market_value
+            total_cost_basis += cost_basis
             total_profit_loss += profit_loss
 
             asset_details.append({
@@ -170,14 +187,22 @@ class PortfolioService:
                 'average_buy_price': asset.average_buy_price,
                 'market_value': market_value,
                 'profit_loss': profit_loss,
+                'profit_loss_percent': profit_loss_percent,
                 'lot_size': stock.lot_size,
             })
+
+        # Расчет Общего P&L % для ПОРТФЕЛЯ
+        total_profit_loss_percent = Decimal('0.00')
+        if total_cost_basis > 0:
+            total_profit_loss_percent = (total_profit_loss / total_cost_basis) * Decimal('100.00')
 
         return {
             'balance': portfolio.balance,
             'total_market_value': total_market_value,
+            'total_cost_basis': total_cost_basis,
             'net_worth': portfolio.balance + total_market_value, # Чистая стоимость (Баланс + Акции)
             'total_profit_loss': total_profit_loss,
+            'total_profit_loss_percent': total_profit_loss_percent,
             'assets': asset_details,
         }
 

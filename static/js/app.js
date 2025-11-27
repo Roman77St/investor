@@ -114,9 +114,11 @@ async function fetchPortfolioSummary() {
 
         const pnlElement = document.getElementById('pnl-display');
         const pnlValue = parseFloat(summary.total_profit_loss);
+        const pnlPercent = parseFloat(summary.total_profit_loss_percent);
+
         const pnlDisplay = pnlValue.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' });
 
-        pnlElement.textContent = `${pnlDisplay} (${(pnlValue / (summary.net_worth - summary.balance)).toFixed(2)}%)`;
+        pnlElement.textContent = `${pnlDisplay} (${pnlPercent.toFixed(2)}%)`;
         pnlElement.className = pnlValue >= 0 ? 'profit' : 'loss';
 
         // 2. Отображение активов
@@ -127,6 +129,8 @@ async function fetchPortfolioSummary() {
             const row = tbody.insertRow();
 
             const assetPnl = parseFloat(asset.profit_loss);
+            const assetPnlPercent = parseFloat(asset.profit_loss_percent);
+
             const pnlClass = assetPnl >= 0 ? 'profit' : 'loss';
             const marketValue = parseFloat(asset.market_value);
 
@@ -136,6 +140,7 @@ async function fetchPortfolioSummary() {
             row.insertCell().textContent = parseFloat(asset.current_price).toFixed(2);
             row.insertCell().textContent = marketValue.toFixed(2);
             row.insertCell().innerHTML = `<span class="${pnlClass}">${assetPnl.toFixed(2)}</span>`;
+            row.insertCell().innerHTML = `<span class="${pnlClass}">${assetPnlPercent.toFixed(2)}%</span>`;
             row.insertCell().textContent = asset.lot_size;
         });
 
