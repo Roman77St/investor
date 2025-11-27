@@ -63,3 +63,63 @@ th {
     text-align: center;
     font-weight: bold;
 }
+
+/* Стили для Аккордеона Истории */
+.history-section {
+    margin-top: 30px;
+    border-top: 2px solid #e9ecef;
+    padding-top: 15px;
+}
+
+.history-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    /* 1. Делаем курсор "рукой" при наведении */
+    cursor: pointer;
+
+    background-color: #f8f9fa;
+    padding: 12px 20px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+
+    /* Плавный переход цветов */
+    transition: all 0.3s ease;
+
+    /* Запрещаем выделение текста при двойном клике */
+    user-select: none;
+}
+
+.history-header h3 {
+    margin: 0;
+    font-size: 1.1em;
+    color: #333; /* Исходный цвет текста */
+    transition: color 0.3s ease;
+}
+
+.arrow {
+    font-size: 1.2em;
+    color: #666; /* Исходный цвет стрелки */
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+
+/* 2. Эффекты при наведении на ВЕСЬ блок */
+.history-header:hover {
+    background-color: #007bff; /* Синий фон */
+    border-color: #0056b3;
+}
+
+/* Меняем цвет текста и стрелки на белый при наведении */
+.history-header:hover h3 {
+    color: white;
+}
+
+.history-header:hover .arrow {
+    color: white;
+}
+
+/* Поворот стрелки когда открыто (класс добавляется через JS) */
+.arrow.open {
+    transform: rotate(90deg); /* Поворот на 90 градусов (вниз) */
+}

@@ -77,7 +77,8 @@ class PortfolioService:
             stock=stock,
             action='BUY',
             quantity=quantity,
-            price=current_price
+            price=current_price,
+            commission=commission,
             # Примечание: Мы могли бы создать отдельную модель для учета комиссии,
             # но для MVP просто фиксируем комиссию в логе.
         )
@@ -130,7 +131,8 @@ class PortfolioService:
             stock=stock,
             action='SELL',
             quantity=quantity,
-            price=current_price
+            price=current_price,
+            commission=commission,
         )
 
         # 6. Удаляем Asset, если она обнуляется
@@ -226,13 +228,15 @@ class PortfolioService:
         # Сериализуем данные вручную (для простоты, без DRF Serializers)
         history = []
         for tx in transactions:
+            transaction_value = tx.price * tx.quantity
             history.append({
                 'id': tx.id,
                 'action': tx.get_action_display(), # 'Покупка' или 'Продажа'
                 'ticker': tx.stock.ticker if tx.stock else 'Удалено',
                 'quantity': tx.quantity,
                 'price': tx.price,
-                'total': tx.price * tx.quantity,
+                'total': transaction_value,
+                'commission': tx.commission,
                 'timestamp': tx.timestamp.isoformat(),
             })
 

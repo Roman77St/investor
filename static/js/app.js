@@ -174,9 +174,9 @@ async function fetchTransactionHistory() {
             const row = tbody.insertRow();
             const timestamp = new Date(tx.timestamp).toLocaleString('ru-RU');
             const total = parseFloat(tx.total);
-
             // Стиль для "Покупка" (BUY) и "Продажа" (SELL)
             const actionClass = tx.action === 'Покупка' ? 'loss' : 'profit';
+            const commission = parseFloat(tx.commission);
 
             row.insertCell().textContent = timestamp;
             row.insertCell().innerHTML = `<span class="${actionClass}">${tx.action}</span>`;
@@ -184,8 +184,13 @@ async function fetchTransactionHistory() {
             row.insertCell().textContent = tx.quantity;
             row.insertCell().textContent = parseFloat(tx.price).toFixed(2);
             row.insertCell().textContent = total.toFixed(2);
+            row.insertCell().textContent = commission.toFixed(2);
         });
-
+        // Загружаем историю только если она открыта
+        const historyContent = document.getElementById('history-content');
+        if (historyContent.style.display !== 'none') {
+            await fetchTransactionHistory();
+        }
     } catch (error) {
         console.error('Не удалось загрузить историю транзакций.', error);
     }
@@ -235,3 +240,32 @@ async function handleTrade(actionType) {
 
 // Инициализация при загрузке страницы
 window.onload = checkAuthStatus;
+
+// Скрытие - показ истории транзакцийю
+function toggleHistory() {
+    const content = document.getElementById('history-content');
+    const arrow = document.getElementById('history-arrow');
+
+    if (content.style.display === 'none') {
+        // ОТКРЫВАЕМ
+        content.style.display = 'block';
+
+        // Меняем символ стрелки
+        arrow.textContent = '▲'; // Стрелка вверх (свернуть)
+        // Или arrow.textContent = '▼'; если хотите стрелку вниз
+
+        arrow.classList.add('open'); // Добавляем класс (для анимации, если нужно)
+
+        // Загружаем данные
+        fetchTransactionHistory();
+    } else {
+        // ЗАКРЫВАЕМ
+        content.style.display = 'none';
+
+        // Возвращаем исходную стрелку
+        arrow.textContent = '▼'; // Стрелка вниз (развернуть)
+        // Или arrow.textContent = '▶';
+
+        arrow.classList.remove('open');
+    }
+}

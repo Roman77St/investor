@@ -58,6 +58,7 @@ class Transaction(models.Model):
 
     quantity = models.PositiveIntegerField()
     price = models.DecimalField(max_digits=14, decimal_places=2)
+    commission = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal(0.00), verbose_name="Комиссия")
     timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:
