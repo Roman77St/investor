@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+<div class="auth-section">
+    <h2>🔑 Регистрация</h2>
+
+    <form id="register-form" class="auth-form">
+        <input type="text" id="register-username" placeholder="Логин" required>
+        <input type="password" id="register-password" placeholder="Пароль" required>
+        <input type="password" id="register-password-confirm" placeholder="Повторите пароль" required>
+        <button type="submit">Зарегистрироваться</button>
+    </form>
+
+    <p style="margin-top: 20px;"><a href="{% url 'home' %}">Вернуться ко входу</a></p>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/register.js' %}"></script>
+{% endblock %}

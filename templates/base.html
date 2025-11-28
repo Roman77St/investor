@@ -1,0 +1,41 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Биржевой Симулятор{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="container">
+            <h1>📈 {% block header_title %}Биржевой Симулятор{% endblock %}</h1>
+            <nav id="main-nav">
+                <span id="user-info-display" class="user-info"></span>
+                <button id="logout-button" class="nav-button" style="display: none;">Выход</button>
+                </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div id="status-message" class="status-message"></div>
+
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <footer class="main-footer">
+        <div class="container">
+            <p>&copy; 2025 Биржевой Симулятор | MVP</p>
+        </div>
+    </footer>
+
+    <script src="{% static 'js/app.js' %}"></script>
+
+    {% block extra_js %}
+    {% endblock %}
+
+</body>
+</html>

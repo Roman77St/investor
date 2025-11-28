@@ -14,16 +14,90 @@ body {
 }
 .auth-section, .portfolio-section {
     margin-bottom: 30px;
-    padding: 15px;
+    padding: 20px;
     border: 1px solid #c9e6ff;
     border-radius: 4px;
     background-color: #f7fcff;
 }
-.trade-form {
-    display: flex;
-    gap: 10px;
-    margin-top: 15px;
+
+.auth-section input {
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    background-color: #fffde7; /* Сохраняем светло-желтый фон */
+    /* Убираем фиксированную ширину, чтобы работала сетка */
+    width: 80%;
 }
+
+.auth-section h3 {
+    grid-column: 1 / -1; /* Заголовок занимает всю ширину сетки */
+    margin-top: 5px;
+    margin-bottom: 5px;
+    font-size: 1em;
+    font-weight: bold;
+    color: #495057;
+}
+
+
+/* Отдельно для формы регистрации, где 4 поля и 1 кнопка */
+#register-form {
+    grid-template-columns: 1fr 1fr 1fr 1fr auto; /* 4 поля ввода + 1 кнопка */
+}
+
+/* В форме регистрации поле "Повторите пароль" должно занимать 4-й столбец,
+   а кнопка - 5-й. В форме входа только 3 поля, поэтому кнопка идет 4-й */
+
+/* Если вам нужно, чтобы поля были ОДИНАКОВОЙ ширины, используйте: */
+#login-form {
+    grid-template-columns: 1fr 1fr 1fr auto;
+}
+#login-form button {
+    grid-column: 4; /* Кнопка в 4-м столбце */
+}
+
+/* Для формы регистрации: */
+#register-form {
+    grid-template-columns: 1fr 1fr 1fr 1fr auto;
+}
+#register-form button {
+    grid-column: 5; /* Кнопка в 5-м столбце */
+}
+
+.auth-section button {
+    background-color: #007bff; /* Синий цвет */
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer; /* 💡 Изменение указателя мыши */
+    transition: background-color 0.2s, transform 0.1s;
+
+    /* 💡 Делаем кнопки одинаковой ширины (если сетка не справляется) */
+    width: 82%;
+}
+
+.auth-section button:hover {
+    background-color: #0056b3; /* Темно-синий при наведении */
+    transform: translateY(-1px); /* Небольшой эффект поднятия */
+}
+
+.auth-section hr {
+    border-top: 1px solid #ced4da;
+    margin: 20px 0;
+}
+
+.trade-form {
+    display: grid;
+    /* Определяем сетку: 3 столбца для полей и 1 для кнопки */
+    /* Ширина полей: примерно 25% * 3 = 75% */
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 15px;
+    margin-top: 15px;
+    align-items: center;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
@@ -122,4 +196,44 @@ th {
 /* Поворот стрелки когда открыто (класс добавляется через JS) */
 .arrow.open {
     transform: rotate(90deg); /* Поворот на 90 градусов (вниз) */
+}
+
+.main-header {
+    background-color: #f8f9fa;
+    margin-bottom: 20px;
+}
+
+.main-header .container {
+    display: flex;
+    justify-content: space-between; /* Распределяем элементы по краям */
+    align-items: center;
+}
+
+#main-nav {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Расстояние между элементами навигации */
+}
+
+.user-info {
+    font-weight: bold;
+    color: #495057;
+}
+
+.nav-button {
+    background-color: #dc3545; /* Красный для выхода */
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.nav-button:hover {
+    background-color: #c82333;
+}
+
+.main-footer {
+    margin-top: 20px;
 }

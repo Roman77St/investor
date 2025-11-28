@@ -1,88 +1,31 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Биржевой Симулятор (MVP)</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-</head>
-<body>
+{% extends "base.html" %}
+{% load static %}
 
-<div class="container">
-    <h1>📈 Биржевой Симулятор</h1>
-    <div id="status-message" class="status-message"></div>
+{% block title %}Вход{% endblock %}
 
-    <div class="auth-section" id="auth-controls">
-        <h2>🔑 Вход</h2>
-        <form id="login-form" class="trade-form">
-            <input type="text" id="username" placeholder="Логин" required>
-            <input type="password" id="password" placeholder="Пароль" required>
-            <button type="submit">Войти</button>
-        </form>
-        <button id="logout-button" style="display: none; margin-top: 10px;">Выйти</button>
-    </div>
+{% block content %}
+<div class="auth-section">
+    <h2>🔑 Вход</h2>
 
-    <div class="portfolio-section" id="portfolio-view" style="display: none;">
-        <h2>💼 Ваш Портфель (<span id="user-display"></span>)</h2>
-        <div class="summary-box">
-            <p>Баланс: <strong id="balance-display"></strong> RUB</p>
-            <p>Стоимость активов: <strong id="market-value-display"></strong> RUB</p>
-            <p>Общая P&L: <strong id="pnl-display"></strong></p>
-        </div>
+    <form id="login-form" class="auth-form">
+        <input type="text" id="login-username" placeholder="Логин" required>
+        <input type="password" id="login-password" placeholder="Пароль" required>
+        <button type="submit">Войти</button>
+    </form>
 
-        <h3>🛒 Совершить сделку</h3>
-        <form id="trade-form">
-            <input type="text" id="ticker" placeholder="Тикер (например, SBER)" required>
-            <input type="number" id="quantity" placeholder="Количество (лот)" required min="1">
-            <button type="button" onclick="handleTrade('buy')">Покупка</button>
-            <button type="button" onclick="handleTrade('sell')">Продажа</button>
-        </form>
+    <p style="margin-top: 20px;">
+        Нет аккаунта? <a href="{% url 'register' %}">Зарегистрироваться</a>
+    </p>
 
-        <h3>Ваши активы</h3>
-        <table id="assets-table">
-            <thead>
-                <tr>
-                    <th>Тикер</th>
-                    <th>Кол-во</th>
-                    <th>Ср. цена</th>
-                    <th>Текущая цена</th>
-                    <th>Стоимость</th>
-                    <th>P&L</th>
-                    <th>P&L %</th>
-                    <th>Лот</th>
-                </tr>
-            </thead>
-            <tbody>
-                </tbody>
-        </table>
-        <div class="history-section">
-                    <div class="history-header" onclick="toggleHistory()">
-                        <h3>📜 История Транзакций</h3>
-                        <span id="history-arrow" class="arrow">▶</span>
-                    </div>
+    <button id="logout-button" style="display: none; margin-top: 20px;">Выйти</button>
+</div>
+{% endblock %}
 
-                    <div id="history-content" style="display: none;">
-                        <table id="history-table">
-                            <thead>
-                                <tr>
-                                    <th>Дата</th>
-                                    <th>Действие</th>
-                                    <th>Тикер</th>
-                                    <th>Кол-во</th>
-                                    <th>Цена</th>
-                                    <th>Сумма</th>
-                                    <th>Комиссия</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+{% block extra_js %}
+<script>
+    // Инициализация. На этой странице мы проверяем токен и перенаправляем.
+    window.onload = checkAuthAndRedirect;
 
-<script src="{% static 'js/app.js' %}"></script>
-
-</body>
-</html>
+    // Примечание: Логика входа теперь будет в app.js
+</script>
+{% endblock %}
