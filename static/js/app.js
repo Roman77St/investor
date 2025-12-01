@@ -4,8 +4,10 @@ const SUMMARY_URL = API_ROOT + 'summary/';
 const HISTORY_URL = API_ROOT + 'history/';
 const TRADE_BUY_URL = API_ROOT + 'trade/buy/';
 const TRADE_SELL_URL = API_ROOT + 'trade/sell/';
+const STOCK_SEARCH_URL = '/api/market/search/';
 const LOGIN_URL = '/auth/token/login/';
 const REGISTER_URL = '/auth/users/';
+const USER_ME_URL = '/auth/users/me/';
 const tokenKey = 'authToken';
 
 // --- УТИЛИТЫ ТОКЕНА ---
@@ -17,6 +19,7 @@ function setAuthToken(token) {
 }
 function clearAuthToken() {
     localStorage.removeItem(tokenKey);
+    sessionStorage.removeItem('userNameDisplay');
 }
 
 // --- УТИЛИТЫ СООБЩЕНИЙ ---
@@ -38,9 +41,69 @@ function displayMessage(message, isError = false) {
 }
 
 // --- ЛОГИКА ИМЕНИ ПОЛЬЗОВАТЕЛЯ (Placeholder) ---
-function getUsernameFromToken() {
-    // В реальном приложении: декодирование JWT или получение имени через API
-    return 'User';
+
+/**
+ * Загружает имя пользователя (FirstName LastName или Username) и отображает его в заголовке,
+ * используя маршрут Djoser.
+ * @returns {Promise<string>} Отображаемое имя
+ */
+async function fetchAndDisplayUserName() {
+    const token = getAuthToken();
+    const userDisplayElement = document.getElementById('user-display');       // Заголовок "Портфель <Имя>"
+    const userInfoDisplayElement = document.getElementById('user-info-display'); // Приветствие "Добро пожаловать, <Имя>."
+
+    if (!token) return 'Пользователь';
+
+    // 1. Проверяем Session Storage, чтобы избежать лишних API-запросов
+    const storedUser = sessionStorage.getItem('userNameDisplay');
+    if (storedUser) {
+        if (userDisplayElement) userDisplayElement.textContent = `Портфель ${storedUser}`;
+        if (userInfoDisplayElement) userInfoDisplayElement.textContent = `Добро пожаловать, ${storedUser}.`;
+        return storedUser;
+    }
+
+    // 2. Устанавливаем статус "загрузка" перед запросом
+    if (userDisplayElement) userDisplayElement.textContent = 'Портфель (загрузка...)';
+
+    // 3. Загружаем с API
+    try {
+        // Используем маршрут Djoser для получения данных пользователя
+        const response = await fetch(USER_ME_URL, {
+            headers: { 'Authorization': `Token ${token}` }
+        });
+
+        if (response.status === 401) {
+            clearAuthToken();
+            window.location.href = '/';
+            return 'Пользователь';
+        }
+
+        const userData = await response.json();
+
+        let userName;
+
+        // 💡 ЛОГИКА ФОРМАТИРОВАНИЯ ИМЕНИ: FirstName + LastName, или Username
+        if (userData.first_name && userData.last_name) {
+            userName = `${userData.first_name} ${userData.last_name}`;
+        } else if (userData.username) {
+            userName = userData.username;
+        } else {
+            userName = 'Пользователь';
+        }
+
+        // 4. Сохраняем и отображаем
+        sessionStorage.setItem('userNameDisplay', userName);
+
+        if (userDisplayElement) userDisplayElement.textContent = `Портфель ${userName}`;
+        if (userInfoDisplayElement) userInfoDisplayElement.textContent = `Добро пожаловать, ${userName}.`;
+
+        return userName;
+
+    } catch (error) {
+        console.error('Не удалось загрузить данные пользователя.', error);
+        if (userDisplayElement) userDisplayElement.textContent = 'Портфель (Ошибка)';
+        return 'Пользователь';
+    }
 }
 
 // --- ЛОГИКА ПЕРЕНАПРАВЛЕНИЯ И ОБНОВЛЕНИЯ HEADER ---
@@ -48,17 +111,14 @@ function getUsernameFromToken() {
 function checkAuthAndRedirect() {
     const token = getAuthToken();
     const isMarketPage = window.location.pathname === '/market/';
-
-    // Элементы всегда доступны, так как они в base.html
     const logoutButton = document.getElementById('logout-button');
-    const userInfoDisplay = document.getElementById('user-info-display');
 
     if (token) {
         // --- Авторизован ---
-        logoutButton.style.display = 'inline-block';
-        userInfoDisplay.textContent = `Добро пожаловать, ${getUsernameFromToken() || 'Пользователь'}.`;
+        if (logoutButton) logoutButton.style.display = 'inline-block';
+        fetchAndDisplayUserName();
 
-        if (!isMarketPage) {
+        if (!isMarketPage && window.location.pathname !== '/register/') {
             // Если на странице входа или регистрации, перенаправляем на биржу
             window.location.href = '/market/';
         }

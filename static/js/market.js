@@ -8,7 +8,6 @@
 
 function checkAuthAndLoadMarket() {
     const token = getAuthToken();
-    const userDisplay = document.getElementById('user-display');
     const portfolioView = document.getElementById('portfolio-view');
 
     if (!token) {
@@ -23,9 +22,6 @@ function checkAuthAndLoadMarket() {
 
     // Вставляем основной HTML
     if (portfolioView) portfolioView.style.display = 'block';
-
-    // Временно получаем имя пользователя из токена или API
-    userDisplay.textContent = 'загрузка...';
 
     // Загружаем данные портфеля
     fetchPortfolioSummary();
@@ -216,3 +212,88 @@ function toggleHistory() {
         arrow.classList.remove('open');
     }
 }
+
+// --- ЛОГИКА АВТОЗАПОЛНЕНИЯ ---
+
+const tickerInput = document.getElementById('ticker');
+const suggestionsContainer = document.getElementById('ticker-suggestions');
+
+// Глобальная переменная для отслеживания таймера (для Debounce)
+let searchTimeout;
+
+if (tickerInput) {
+    tickerInput.addEventListener('input', () => {
+        const query = tickerInput.value.trim();
+
+        // Очищаем предыдущий таймер
+        clearTimeout(searchTimeout);
+
+        if (query.length < 2) {
+            suggestionsContainer.innerHTML = '';
+            suggestionsContainer.style.display = 'none';
+            return;
+        }
+
+        // Задержка (Debounce) 300 мс для уменьшения нагрузки на сервер
+        searchTimeout = setTimeout(() => {
+            fetchSuggestions(query);
+        }, 300);
+    });
+}
+
+async function fetchSuggestions(query) {
+    const token = getAuthToken();
+    if (!token) return;
+
+    try {
+        const response = await fetch(`${STOCK_SEARCH_URL}?q=${query}`, {
+            headers: { 'Authorization': `Token ${token}` }
+        });
+
+        if (!response.ok) {
+            console.error('Ошибка поиска акций:', response.status);
+            return;
+        }
+
+        const stocks = await response.json();
+
+        renderSuggestions(stocks);
+
+    } catch (error) {
+        console.error('Произошла сетевая ошибка при поиске.', error);
+    }
+}
+
+function renderSuggestions(stocks) {
+    suggestionsContainer.innerHTML = '';
+
+    if (stocks.length === 0) {
+        suggestionsContainer.style.display = 'none';
+        return;
+    }
+
+    stocks.forEach(stock => {
+        const item = document.createElement('div');
+        item.classList.add('suggestion-item');
+        item.textContent = `${stock.ticker} (${stock.name})`;
+        item.setAttribute('data-ticker', stock.ticker);
+
+        // Обработчик клика: вставляем тикер в поле ввода и скрываем список
+        item.addEventListener('click', () => {
+            tickerInput.value = stock.ticker;
+            suggestionsContainer.innerHTML = '';
+            suggestionsContainer.style.display = 'none';
+        });
+
+        suggestionsContainer.appendChild(item);
+    });
+
+    suggestionsContainer.style.display = 'block';
+}
+
+// Добавляем обработчик для закрытия списка при клике вне него
+document.addEventListener('click', (e) => {
+    if (!tickerInput.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+        suggestionsContainer.style.display = 'none';
+    }
+});

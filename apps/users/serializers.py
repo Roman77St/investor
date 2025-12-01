@@ -16,5 +16,5 @@ class CustomUserSerializer(UserSerializer):
     class Meta(UserSerializer.Meta):
         # 💡 Явно указываем, что используем вашу модель User
         model = User
-        fields = ('id', 'username')
+        fields = ('id', 'username', 'first_name', 'last_name')
         # Добавьте сюда любые кастомные поля

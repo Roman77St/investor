@@ -14,7 +14,11 @@
 
         <h3>🛒 Совершить сделку</h3>
         <form id="trade-form" class="trade-form">
-            <input type="text" id="ticker" placeholder="Тикер (напр., SBER)" required>
+            <div class="autocomplete-container">
+                <input type="text" id="ticker" placeholder="Тикер (напр., SBER)" required autocomplete="off">
+                <div id="ticker-suggestions" class="suggestions-dropdown"></div>
+            </div>
+
             <input type="number" id="quantity" placeholder="Кол-во (лот)" required min="1">
             <button type="button" onclick="handleTrade('buy')">Покупка</button>
             <button type="button" onclick="handleTrade('sell')">Продажа</button>
@@ -23,7 +27,16 @@
         <h3>Ваши активы</h3>
         <table id="assets-table">
             <thead>
-                <tr><th>Тикер</th><th>Кол-во</th><th>Ср. цена</th><th>Тек. цена</th><th>Стоимость</th><th>P&L</th><th>P&L %</th><th>Лот</th></tr>
+                <tr>
+                    <th>Тикер</th>
+                    <th>Кол-во</th>
+                    <th>Ср. цена</th>
+                    <th>Тек. цена</th>
+                    <th>Стоимость</th>
+                    <th>P&L</th>
+                    <th>P&L %</th>
+                    <th>Лот</th>
+                </tr>
             </thead>
             <tbody></tbody>
         </table>
@@ -36,7 +49,15 @@
             <div id="history-content" style="display: none;">
                 <table id="history-table">
                     <thead>
-                        <tr><th>Дата</th><th>Действие</th><th>Тикер</th><th>Кол-во</th><th>Цена</th><th>Сумма</th><th>Комиссия</th></tr>
+                        <tr>
+                            <th>Дата</th>
+                            <th>Действие</th>
+                            <th>Тикер</th>
+                            <th>Кол-во</th>
+                            <th>Цена</th>
+                            <th>Сумма</th>
+                            <th>Комиссия</th>
+                        </tr>
                     </thead>
                     <tbody></tbody>
                 </table>

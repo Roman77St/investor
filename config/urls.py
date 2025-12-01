@@ -21,6 +21,7 @@ from django.views.generic import TemplateView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/portfolio/', include('apps.portfolio.urls')),
+    path('api/market/', include('apps.market.urls')),
     path('auth/', include('djoser.urls')),         # Управление пользователями
     path('auth/', include('djoser.urls.authtoken')), # Вход/выход по токену
     path('', TemplateView.as_view(template_name='index.html'), name='home'),

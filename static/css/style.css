@@ -92,7 +92,7 @@ body {
     display: grid;
     /* Определяем сетку: 3 столбца для полей и 1 для кнопки */
     /* Ширина полей: примерно 25% * 3 = 75% */
-    grid-template-columns: 1fr 1fr 1fr auto;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
     gap: 15px;
     margin-top: 15px;
     align-items: center;
@@ -199,7 +199,6 @@ th {
 }
 
 .main-header {
-    background-color: #f8f9fa;
     margin-bottom: 20px;
 }
 
@@ -236,4 +235,40 @@ th {
 
 .main-footer {
     margin-top: 20px;
+}
+
+/* Выпадающий список при поиске акций. */
+
+.autocomplete-container {
+    position: relative; /* Обязательно для позиционирования выпадающего списка */
+    width: 100%;
+}
+
+#ticker {
+    width: 100%;
+}
+
+.suggestions-dropdown {
+    position: absolute;
+    top: 100%; /* Позиционирует список прямо под полем ввода */
+    left: 0;
+    right: 0;
+    z-index: 100;
+    border: 1px solid #ccc;
+    background: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-height: 200px;
+    overflow-y: auto;
+    display: none; /* Скрыт по умолчанию */
+}
+
+.suggestion-item {
+    padding: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    border-bottom: 1px solid #eee;
+}
+
+.suggestion-item:hover {
+    background-color: #f0f0f0;
 }
