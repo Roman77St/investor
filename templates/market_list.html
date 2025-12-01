@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Рынок Акций{% endblock %}
+{% block header_title %}Рынок Акций{% endblock %}
+
+{% block content %}
+
+    <div class="market-list-section">
+        <h2>Доступные акции для покупки</h2>
+
+        <div class="search-controls">
+            <input type="text" id="market-search-input" placeholder="Искать по тикеру или названию...">
+            </div>
+
+        <table id="market-stocks-table" class="data-table">
+            <thead>
+                <tr>
+                    <th>Тикер</th>
+                    <th>Название</th>
+                    <th>Цена (RUB)</th>
+                    <th>Действие</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td colspan="4">Загрузка данных...</td></tr>
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/market_list.js' %}"></script>
+<script>
+    // Запускаем загрузку данных при загрузке страницы
+    window.onload = fetchAndRenderMarketList;
+</script>
+{% endblock %}

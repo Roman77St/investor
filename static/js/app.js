@@ -5,6 +5,7 @@ const HISTORY_URL = API_ROOT + 'history/';
 const TRADE_BUY_URL = API_ROOT + 'trade/buy/';
 const TRADE_SELL_URL = API_ROOT + 'trade/sell/';
 const STOCK_SEARCH_URL = '/api/market/search/';
+const MARKET_LIST_URL = '/api/market/list/';
 const LOGIN_URL = '/auth/token/login/';
 const REGISTER_URL = '/auth/users/';
 const USER_ME_URL = '/auth/users/me/';

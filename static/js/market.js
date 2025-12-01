@@ -297,3 +297,15 @@ document.addEventListener('click', (e) => {
         suggestionsContainer.style.display = 'none';
     }
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Проверяем, есть ли тикер, сохраненный для предзаполнения
+    const prefillTicker = localStorage.getItem('prefillTicker');
+    const tickerInput = document.getElementById('ticker');
+
+    if (prefillTicker && tickerInput) {
+        tickerInput.value = prefillTicker;
+        // Очищаем хранилище, чтобы не подставлять тикер при следующем прямом переходе
+        localStorage.removeItem('prefillTicker');
+    }
+});

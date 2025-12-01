@@ -26,5 +26,6 @@ urlpatterns = [
     path('auth/', include('djoser.urls.authtoken')), # Вход/выход по токену
     path('', TemplateView.as_view(template_name='index.html'), name='home'),
     path('register/', TemplateView.as_view(template_name='register.html'), name='register'),
-    path('market/', TemplateView.as_view(template_name='market.html'), name='market'),
+    path('market/', TemplateView.as_view(template_name='market.html'), name='portfolio'),
+    path('stocks/', TemplateView.as_view(template_name='market_list.html'), name='market_list')
 ]

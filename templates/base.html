@@ -15,12 +15,17 @@
             <nav id="main-nav">
                 <span id="user-info-display" class="user-info"></span>
                 <button id="logout-button" class="nav-button" style="display: none;">Выход</button>
-                </nav>
+            </nav>
         </div>
     </header>
 
     <div class="container">
         <div id="status-message" class="status-message"></div>
+
+        <nav class="sub-nav">
+            <a href="{% url 'portfolio' %}" class="nav-link">Мой Портфель</a>
+            <a href="{% url 'market_list' %}" class="nav-link">Рынок Акций</a>
+        </nav>
 
         {% block content %}
         {% endblock %}
