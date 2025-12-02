@@ -31,6 +31,11 @@ class PortfolioService:
         stock = get_object_or_404(Stock, ticker=ticker_symbol.upper())
         current_price = stock.current_price
 
+        if current_price is None or current_price <= Decimal('0'):
+            error_msg = f"Сделка по акции {ticker_symbol.upper()} невозможна: цена не определена ({current_price or '0.00'} RUB)."
+            logger.warning(f"Ошибка покупки для пользователя {user.username}: {error_msg}")
+            return {'success': False, 'error': error_msg}
+
         # 2. Проверяем лотность (количество должно быть кратно лоту)
         if quantity % stock.lot_size != 0:
             return {'success': False, 'error': f"Количество {quantity} должно быть кратно размеру лота: {stock.lot_size}."}
@@ -97,6 +102,11 @@ class PortfolioService:
         portfolio = PortfolioService.get_user_portfolio(user)
         stock = get_object_or_404(Stock, ticker=ticker_symbol.upper())
         current_price = stock.current_price
+
+        if current_price is None or current_price <= Decimal('0'):
+            error_msg = f"Сделка по акции {ticker_symbol.upper()} невозможна: цена не определена ({current_price or '0.00'} RUB)."
+            logger.warning(f"Ошибка продажи для пользователя {user.username}: {error_msg}")
+            return {'success': False, 'error': error_msg}
 
         # 1. Получаем существующий Asset
         try:

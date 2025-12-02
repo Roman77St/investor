@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import sys
 import os
 from pathlib import Path
-from celery.schedules import crontab
+from celery.schedules import crontab, timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -114,7 +114,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
+# https://docs.djangoproject.com/en/5.2/topics/i18n/60.0*2
 
 LANGUAGE_CODE = 'ru-ru'
 
@@ -160,8 +160,7 @@ CELERY_BEAT_SCHEDULE = {
     'update-stock-prices-every-minute': {
         # Путь к функции-задаче
         'task': 'apps.market.tasks.update_stock_prices_task',
-        # Запускать каждые 120 секунд (2 минуты)
-        'schedule': 60.0*2,
+        'schedule': timedelta(minutes=2.0),
     },
     're-initialize-stocks-weekly': {
         'task': 'apps.market.tasks.initialize_all_stocks_task',
