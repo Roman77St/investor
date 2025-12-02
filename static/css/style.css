@@ -272,3 +272,7 @@ th {
 .suggestion-item:hover {
     background-color: #f0f0f0;
 }
+
+#market-search-input {
+    width: 300px;
+}

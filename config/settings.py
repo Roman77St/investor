@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import sys
 import os
 from pathlib import Path
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -159,9 +160,13 @@ CELERY_BEAT_SCHEDULE = {
     'update-stock-prices-every-minute': {
         # Путь к функции-задаче
         'task': 'apps.market.tasks.update_stock_prices_task',
-        # Запускать каждые 60 секунд (1 минута)
-        'schedule': 60.0,
+        # Запускать каждые 120 секунд (2 минуты)
+        'schedule': 60.0*2,
     },
+    're-initialize-stocks-weekly': {
+        'task': 'apps.market.tasks.initialize_all_stocks_task',
+        'schedule': crontab(hour=4, minute=30, day_of_week=6), # 💡 Расписание: каждую субботу (day_of_week=6) в 04:30
+    }
 }
 # Для автоматического обновления цен запускаем следующие процессы:
 # Запуск  Redis: docker run -d -p 6379:6379 --name investor-redis redis
