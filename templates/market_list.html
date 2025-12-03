@@ -13,6 +13,42 @@
             <input type="text" id="market-search-input" placeholder="Искать по тикеру или названию...">
             </div>
 
+        <div class="market-filters">
+            <h3>🔍 Фильтры</h3>
+            <div class="filter-controls">
+                <select id="filter-sector">
+                    <option value="ALL">Сектор (Все)</option>
+                    <option value="OGAS">Нефть и Газ</option>
+                    <option value="FINS">Финансовый</option>
+                    <option value="MTLS">Металлургия</option>
+                    <option value="TLCM">Телекоммуникации</option>
+                    <option value="RTIL">Потребительский</option>
+                    <option value="IT">Информационные технологии</option>
+                    <option value="ELC">Электроэнергетика</option>
+                    <option value="OTHR">Прочее</option>
+                    </select>
+
+                <select id="filter-listing">
+                    <option value="ALL">Уровень листинга (Все)</option>
+                    <option value="1">Первый</option>
+                    <option value="2">Второй</option>
+                    <option value="3">Третий</option>
+                </select>
+
+                <select id="filter-type">
+                    <option value="ALL">Тип акции (Все)</option>
+                    <option value="COMMON">Обыкновенные</option>
+                    <option value="PREFERRED">Привилегированные</option>
+                </select>
+
+                <label for="filter-bluechip" class="checkbox-label">
+                    <input type="checkbox" id="filter-bluechip"> Голубые фишки
+                </label>
+
+                <button id="apply-filters-button" class="btn btn-primary">Применить</button>
+            </div>
+        </div>
+
         <table id="market-stocks-table" class="data-table">
             <thead>
                 <tr>

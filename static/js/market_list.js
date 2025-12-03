@@ -8,12 +8,43 @@ async function fetchAndRenderMarketList() {
         window.location.href = '/';
         return;
     }
-
     const tableBody = document.querySelector('#market-stocks-table tbody');
     tableBody.innerHTML = '<tr><td colspan="4">Загрузка...</td></tr>';
 
+    // 1. Сбор значений фильтров и поискового запроса
+    const searchInput = document.getElementById('market-search-input');
+    const sectorElement = document.getElementById('filter-sector');
+    const listingElement = document.getElementById('filter-listing');
+    const typeElement = document.getElementById('filter-type');
+    const blueChipElement = document.getElementById('filter-bluechip');
+
+    const params = new URLSearchParams();
+
+    // Поисковый запрос (q)
+    if (searchInput && searchInput.value) {
+        params.append('q', searchInput.value.trim());
+    }
+
+    // Фильтры (проверяем наличие элемента и его значение)
+    if (sectorElement && sectorElement.value !== 'ALL') {
+        params.append('sector', sectorElement.value);
+    }
+    if (listingElement && listingElement.value !== 'ALL') {
+        params.append('listing_level', listingElement.value);
+    }
+    if (typeElement && typeElement.value !== 'ALL') {
+        params.append('stock_type', typeElement.value);
+    }
+    // Голубые фишки (отправляем 'true' только если чекбокс отмечен)
+    if (blueChipElement && blueChipElement.checked) {
+        params.append('blue_chip', 'true');
+    }
+
+    // 2. Формируем конечный URL с параметрами
+    const url = `${MARKET_LIST_URL}?${params.toString()}`;
+
     try {
-        const response = await fetch(MARKET_LIST_URL, {
+        const response = await fetch(url, {
             headers: { 'Authorization': `Token ${token}` }
         });
 
@@ -24,7 +55,7 @@ async function fetchAndRenderMarketList() {
 
         const stocks = await response.json();
 
-        // Очищаем и рендерим данные
+        // 3. Очищаем и рендерим данные
         tableBody.innerHTML = '';
         if (stocks.length === 0) {
              tableBody.innerHTML = '<tr><td colspan="4">На рынке нет доступных акций.</td></tr>';
@@ -42,7 +73,7 @@ async function fetchAndRenderMarketList() {
             actionCell.innerHTML = `<button class="buy-market-btn" data-ticker="${stock.ticker}">Купить</button>`;
         });
 
-        // Добавляем обработчики для кнопок "Купить"
+        // 4. Добавляем обработчики для кнопок "Купить"
         attachBuyButtonListeners();
 
     } catch (error) {
@@ -68,34 +99,6 @@ function attachBuyButtonListeners() {
     });
 }
 
-
-// --- ДОБАВЛЕНИЕ ЛОГИКИ ПОИСКА/ФИЛЬТРАЦИИ (необходимо) ---
-
-// 💡 Заглушка для фильтрации на стороне клиента
-document.addEventListener('DOMContentLoaded', () => {
-    const searchInput = document.getElementById('market-search-input');
-    if (searchInput) {
-        searchInput.addEventListener('input', debounce(filterMarketTable, 300));
-    }
-});
-
-function filterMarketTable(e) {
-    const filter = e.target.value.toLowerCase();
-    const rows = document.querySelectorAll('#market-stocks-table tbody tr');
-
-    rows.forEach(row => {
-        // Получаем тикер и название
-        const ticker = row.cells[0].textContent.toLowerCase();
-        const name = row.cells[1].textContent.toLowerCase();
-
-        if (ticker.includes(filter) || name.includes(filter) || filter === '') {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
-    });
-}
-
 // Утилита Debounce (для улучшения производительности поиска)
 function debounce(func, delay) {
     let timeoutId;
@@ -106,3 +109,26 @@ function debounce(func, delay) {
         }, delay);
     };
 }
+
+// --- ИНИЦИАЛИЗАЦИЯ ---
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Получаем элементы управления
+    const applyButton = document.getElementById('apply-filters-button');
+    const searchInput = document.getElementById('market-search-input');
+
+    // 1. Привязываем кнопку "Применить"
+    if (applyButton) {
+        // При клике на "Применить" вызываем загрузку данных с фильтрами
+        applyButton.addEventListener('click', fetchAndRenderMarketList);
+    }
+    // 2. Привязываем поле поиска
+    if (searchInput) {
+        // При вводе в поле поиска вызываем загрузку с задержкой (debounce)
+        searchInput.addEventListener('input', debounce(filterMarketTable, 300));
+    }
+    // 3. Запускаем первоначальную загрузку
+    if (getAuthToken()) {
+        fetchAndRenderMarketList();
+    }
+});
